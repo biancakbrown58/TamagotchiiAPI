@@ -124,18 +124,14 @@ namespace TamagotchiiAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<Pet>> PostPet(Pet pet)
         {
-
             if (pet.HungerLevel > 0)
             {
                 return BadRequest(new { Message = "Hunger Level starts at 0." });
             }
-
             if (pet.HappinessLevel > 0)
             {
                 return BadRequest(new { Message = "Happiness Level starts at 0." });
             }
-            // var assertBirthday = DateTime.Now;
-            //    return pet.Birthday = Date;
 
             // Indicate to the database context we want to add this new record
             _context.Pets.Add(pet);
@@ -178,5 +174,61 @@ namespace TamagotchiiAPI.Controllers
         {
             return _context.Pets.Any(pet => pet.Id == id);
         }
+
+        [HttpPost("{id}/Playtimes")]
+        public async Task<ActionResult<Playtime>> AddPlayingTime(int id, Playtime playtime)
+        {
+            var pet = await _context.Pets.FindAsync(id);
+            if (pet == null)
+            {
+                return NotFound();
+            }
+            playtime.PetId = pet.Id;
+            pet.HappinessLevel += 5;
+            pet.HungerLevel += 3;
+            // playtime.When = DateTime.Now;
+
+            _context.Playtimes.Add(playtime);
+            await _context.SaveChangesAsync();
+
+            return Ok(playtime);
+        }
+
+        [HttpPost("{id}/Feedings")]
+        public async Task<ActionResult<Feeding>> AddFeeding(int id, Feeding feeding)
+        {
+            var pet = await _context.Pets.FindAsync(id);
+            if (pet == null)
+            {
+                return NotFound();
+            }
+            feeding.PetId = pet.Id;
+            pet.HappinessLevel += 3;
+            pet.HungerLevel -= 5;
+
+            _context.Feedings.Add(feeding);
+            await _context.SaveChangesAsync();
+
+            return Ok(feeding);
+        }
+
+        [HttpPost("{id}/Scoldings")]
+        public async Task<ActionResult<Scolding>> AddScolding(int id, Scolding scolding)
+        {
+            var pet = await _context.Pets.FindAsync(id);
+            if (pet == null)
+            {
+                return NotFound();
+            }
+            scolding.PetId = pet.Id;
+            pet.HappinessLevel -= 5;
+
+            _context.Scoldings.Add(scolding);
+            await _context.SaveChangesAsync();
+
+            return Ok(scolding);
+        }
+
+
     }
 }
